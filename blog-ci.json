@@ -1,0 +1,419 @@
+{
+	"info": {
+		"_postman_id": "8602c8c2-73e5-4f4d-8209-366b55b458c5",
+		"name": "Blog API Endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1230718"
+	},
+	"item": [
+		{
+			"name": "Register a new user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('it should register a new user with valida data', () => {\r",
+							"    pm.response.to.have.status(201)\r",
+							"    //Converte a resposta em JSON\r",
+							"    const { user } = pm.response.json()\r",
+							"    pm.expect(user).to.not.null\r",
+							"    //Validar que o ID é maior que zero\r",
+							"    pm.expect(user.id).to.greaterThan(0)    \r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//Gerando e-mail aleatorio\r",
+							"const email = `regina.${new Date().getTime()}@email.com`\r",
+							"\r",
+							"pm.environment.set(\"userEmail\", email)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Regina Becker\",\r\n  \"email\": \"{{userEmail}}\",\r\n  \"password\": \"Senha1234\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register a user with invalid data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('it should not register a user with invalid password', () => {\r",
+							"    pm.response.to.have.status(400)\r",
+							"    //Converte a resposta em JSON\r",
+							"    const { messages } = pm.response.json()\r",
+							"    pm.expect(messages).to.not.null  \r",
+							"    //Array de mensagens, retornou apenas uma messages[0]\r",
+							"    pm.expect(messages[0]).to.equal(\"Password must contain at least 8 characters, 1 uppercase character, and 1 digit\")\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Teste Becker\",\r\n  \"email\": \"teste@email.com\",\r\n  \"password\": \"12345\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Authenticate a user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('it should register a new user with valid data', () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    //Converte a resposta em JSON\r",
+							"    const { user } = pm.response.json()\r",
+							"    pm.expect(user).to.not.null\r",
+							"    //Validar que o ID é maior que zero\r",
+							"    pm.expect(user.id).to.greaterThan(0)    \r",
+							"})\r",
+							"\r",
+							"    //Converte a resposta em JSON\r",
+							"    const { authorized, token } = pm.response.json(0)\r",
+							"    //Guardando o Token no Enviroment\r",
+							"    pm.environment.set(\"token\", token)\r",
+							"\r",
+							"    pm.test('it should authenticate a user valid credentials', () => {\r",
+							"    pm.expect(authorized).to.not.null\r",
+							"    //Validar que o atributo authorized retornou true\r",
+							"    pm.expect(authorized).to.equal(true)\r",
+							"    //Validar que o token é maior que zero\r",
+							"    pm.expect(token).to.have.length.greaterThan(0)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"{{userEmail}}\",\r\n  \"password\": \"Senha1234\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register a new post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"    //Converte a resposta em JSON\r",
+							"    const { post } = pm.response.json()\r",
+							"    //Guardar em Enviroment\r",
+							"    pm.environment.set(\"postID\", post.id)\r",
+							"    pm.environment.set(\"postUserID\", post.user.id)\r",
+							"    pm.environment.set(\"postUserName\", post.user.name)\r",
+							"    pm.environment.set(\"postUserEmail\", post.user.email)\r",
+							"    \r",
+							"    pm.test('it should register a new post with valid data', () => {\r",
+							"    pm.response.to.have.status(201)\r",
+							"    pm.expect(post).to.not.null\r",
+							"    //Validar que o ID é maior que zero\r",
+							"    pm.expect(post.id).to.greaterThan(0)\r",
+							"    pm.expect(post.title).to.equal(\"Aprendendo programming with Go\")\r",
+							"    pm.expect(post.content).to.equal(\"Go is a very popular programming language, which is great for learning programming logics.\")\r",
+							"    pm.expect(post.user).to.not.null\r",
+							"    //Validar que o ID é maior que zero\r",
+							"    pm.expect(post.user.id).to.greaterThan(0)    \r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Aprendendo programming with Go\",\r\n  \"content\": \"Go is a very popular programming language, which is great for learning programming logics.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/posts",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieves a post by its id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('it should Retrieve a previously registered post by its id', () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    //Converte a resposta em JSON\r",
+							"    const { post } = pm.response.json()\r",
+							"    pm.expect(post).to.not.null\r",
+							"\r",
+							"    //Buscar o valor do atributo postId do environment\r",
+							"    const postId =   pm.environment.get('postID')        \r",
+							"    pm.expect(post.id).to.equal(postId)\r",
+							"\r",
+							"    //Validar title\r",
+							"    pm.expect(post.title).to.equal(\"Aprendendo programming with Go\")\r",
+							"    \r",
+							"    //Validar content    \r",
+							"    pm.expect(post.content).to.equal(\"Go is a very popular programming language, which is great for learning programming logics.\")\r",
+							"\r",
+							"    pm.expect(post.user).to.not.null\r",
+							"    //Validar que o ID é maior que zero\r",
+							"    pm.expect(post.user.id).to.greaterThan(0)    \r",
+							"    \r",
+							"    //Buscar o valor do atributo postUserID do environment\r",
+							"    const postUserId =   pm.environment.get('postUserID')        \r",
+							"    pm.expect(post.user.id).to.equal(postUserId)\r",
+							"\r",
+							"    //Buscar o valor do atributo postUserName do environment\r",
+							"    const postUserName =   pm.environment.get('postUserName')        \r",
+							"    pm.expect(post.user.name).to.equal(postUserName)  \r",
+							"\r",
+							"    //Buscar o valor do atributo postUserEmail do environment\r",
+							"    const postUseremail =   pm.environment.get('postUserEmail')        \r",
+							"    pm.expect(post.user.email).to.equal(postUseremail)       \r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/posts/{{postID}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts",
+						"{{postID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deletes a post by its id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test('it should delete a previously registered post by its id', () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    const { message } = pm.response.json()\r",
+							"    pm.expect(message).to.equal('Post deleted')\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/posts/{{postID}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts",
+						"{{postID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a user by e-mail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test('it should delete a previously registered user by its Email', () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    const { message } = pm.response.json()\r",
+							"    pm.expect(message).to.equal('User deleted')\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/users/{{postUserEmail}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						"{{postUserEmail}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
